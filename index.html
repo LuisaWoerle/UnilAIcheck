@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>UNIL AI use-case check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F5F4; --surface:#FFFFFF; --ink:#18212B; --muted:#56626D; --line:#D3DADE;
+  --lake:#1D5A73; --lake-soft:#E2EDF1; --green:#2E7A49; --yellow:#B98512; --orange:#C0561E; --red:#A3302C;
+  --lamp-off:#E4E8EA; --shadow:0 1px 0 rgba(24,33,43,.06);
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#11171C; --surface:#1A2228; --ink:#E6EBEE; --muted:#9AA6B0; --line:#2D3940;
+    --lake:#79B8D2; --lake-soft:#1C3340; --green:#4FB477; --yellow:#E0AE3A; --orange:#EC834A; --red:#E0625C;
+    --lamp-off:#263139; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11171C; --surface:#1A2228; --ink:#E6EBEE; --muted:#9AA6B0; --line:#2D3940;
+  --lake:#79B8D2; --lake-soft:#1C3340; --green:#4FB477; --yellow:#E0AE3A; --orange:#EC834A; --red:#E0625C;
+  --lamp-off:#263139; color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.55}
+h1,h2,h3{font-family:"Newsreader",Georgia,"Times New Roman",serif;font-weight:600;line-height:1.2;margin:0}
+a{color:var(--lake)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--lake);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 60px}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:24px}
+header.top h1{font-size:clamp(1.7rem,3.4vw,2.4rem)}
+header.top p{margin:6px 0 0;color:var(--muted);max-width:62ch}
+.tabs{display:flex;gap:4px;background:var(--lake-soft);padding:4px;border-radius:10px}
+.tabs button{border:0;background:transparent;padding:8px 14px;border-radius:7px;cursor:pointer;font-weight:600;font-size:.92rem;color:var(--muted)}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:1fr}.file{order:-1}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:26px}
+.step-meta{color:var(--muted);font-size:.85rem;margin-bottom:10px}
+.q{font-family:"Newsreader",Georgia,serif;font-size:1.45rem;line-height:1.3;margin:0 0 8px}
+.help{color:var(--muted);margin:0 0 18px;max-width:68ch}
+.opts{display:grid;gap:10px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:13px 15px;cursor:pointer}
+.opt:hover{border-color:var(--lake)}
+.opt[aria-pressed="true"],.opt.on{border-color:var(--lake);background:var(--lake-soft)}
+.opt .box{flex:0 0 18px;height:18px;margin-top:3px;border:2px solid var(--muted);border-radius:4px;display:grid;place-items:center}
+.opt.on .box{background:var(--lake);border-color:var(--lake)}
+.opt.on .box::after{content:"";width:5px;height:9px;border:solid var(--surface);border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.opt .lbl{font-weight:600}
+.opt .sub{display:block;font-weight:400;color:var(--muted);font-size:.9rem;margin-top:2px}
+.opt .ref{display:inline-block;font-size:.78rem;color:var(--lake);font-weight:600;margin-top:4px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;align-items:center}
+.btn{border:1px solid var(--line);background:var(--surface);padding:10px 16px;border-radius:9px;cursor:pointer;font-weight:600}
+.btn.primary{background:var(--lake);border-color:var(--lake);color:var(--surface)}
+.btn:disabled{opacity:.45;cursor:default}
+.hint{color:var(--muted);font-size:.85rem}
+label.field{display:block;margin-bottom:14px;font-weight:600}
+label.field span{display:block;font-weight:400;color:var(--muted);font-size:.88rem}
+input[type=text]{width:100%;margin-top:6px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+.presets{margin-top:22px;padding-top:18px;border-top:1px dashed var(--line)}
+.presets h3{font-size:1.05rem;margin-bottom:4px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{border:1px solid var(--line);background:var(--bg);padding:7px 12px;border-radius:999px;cursor:pointer;font-size:.88rem}
+.chip:hover{border-color:var(--lake)}
+
+/* case file + signal */
+.file{position:sticky;top:calc(16px + env(safe-area-inset-top,0px))}
+.file .card{padding:20px}
+.signal{display:flex;gap:16px;align-items:center;margin-bottom:16px}
+.pole{background:#1E272E;border-radius:16px;padding:9px 8px;display:grid;gap:7px}
+.lamp{width:30px;height:30px;border-radius:50%;background:var(--lamp-off);transition:background .35s,box-shadow .35s}
+.lamp.on.red{background:var(--red);box-shadow:0 0 14px var(--red)}
+.lamp.on.orange{background:var(--orange);box-shadow:0 0 14px var(--orange)}
+.lamp.on.yellow{background:var(--yellow);box-shadow:0 0 14px var(--yellow)}
+.lamp.on.green{background:var(--green);box-shadow:0 0 14px var(--green)}
+@media (prefers-reduced-motion:reduce){.lamp{transition:none}}
+.sig-text b{display:block;font-size:1.05rem}
+.sig-text span{color:var(--muted);font-size:.85rem}
+.trail{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.trail li{border-bottom:1px solid var(--line)}
+.trail button{display:block;width:100%;text-align:left;background:none;border:0;padding:9px 2px;cursor:pointer}
+.trail .k{display:block;color:var(--muted);font-size:.78rem}
+.trail .v{font-size:.9rem;font-weight:500}
+.trail li.cur .k{color:var(--lake);font-weight:600}
+.trail .empty{color:var(--muted);font-size:.88rem;padding:10px 0}
+
+/* result */
+.verdict{border-radius:14px;padding:24px;color:#fff;margin-bottom:22px}
+.verdict.green{background:var(--green)} .verdict.yellow{background:var(--yellow)} .verdict.orange{background:var(--orange)} .verdict.red{background:var(--red)} .verdict.grey{background:var(--muted)}
+:root[data-theme="dark"] .verdict, :root[data-theme="dark"] .verdict *{color:#11171C}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .verdict, :root:not([data-theme="light"]) .verdict *{color:#11171C}}
+.verdict .tier{font-size:.9rem;font-weight:600;opacity:.9}
+.verdict h2{font-size:clamp(1.5rem,3vw,2rem);margin:4px 0 8px}
+.verdict p{margin:0;max-width:70ch}
+.section{margin-top:26px}
+.section h3{font-size:1.3rem;margin-bottom:10px}
+.blocker{border-left:4px solid var(--red);background:var(--bg);padding:12px 14px;border-radius:0 8px 8px 0;margin-bottom:10px}
+.blocker b{display:block}
+ul.items{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+ul.items li{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+ul.items li b{display:block}
+ul.items li .ref{color:var(--lake);font-size:.82rem;font-weight:600}
+ul.items li p{margin:4px 0 0;color:var(--muted);font-size:.92rem}
+.lawgroup{margin-bottom:16px}
+.lawgroup h4{margin:0 0 8px;font-size:.95rem}
+ol.route{margin:0;padding-left:0;list-style:none;counter-reset:r;display:grid;gap:0}
+ol.route li{counter-increment:r;position:relative;padding:0 0 16px 44px}
+ol.route li::before{content:counter(r);position:absolute;left:0;top:0;width:30px;height:30px;border-radius:50%;background:var(--lake-soft);color:var(--lake);font-weight:700;display:grid;place-items:center;font-size:.9rem}
+ol.route li::after{content:"";position:absolute;left:14px;top:32px;bottom:2px;width:2px;background:var(--line)}
+ol.route li:last-child::after{display:none}
+ol.route b{display:block}
+ol.route span{color:var(--muted);font-size:.92rem}
+.check li{display:flex;gap:10px}
+.check input{margin-top:5px;accent-color:var(--lake);width:16px;height:16px;flex:0 0 auto}
+textarea{width:100%;min-height:220px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:.85rem/1.5 "Public Sans",system-ui,sans-serif;resize:vertical}
+.note{font-size:.85rem;color:var(--muted);margin-top:22px;border-top:1px solid var(--line);padding-top:14px}
+
+/* overview */
+.ov h2{font-size:1.6rem;margin-bottom:8px}
+.ov p.lead{color:var(--muted);max-width:70ch;margin:0 0 22px}
+.gates{display:grid;gap:0;counter-reset:g}
+.gate{display:grid;grid-template-columns:44px 1fr;gap:14px;padding:14px 0;border-top:1px solid var(--line)}
+.gate .n{counter-increment:g;font-family:"Newsreader",Georgia,serif;font-size:1.6rem;color:var(--lake)}
+.gate .n::before{content:counter(g)}
+.gate h3{font-size:1.15rem}
+.gate p{margin:4px 0 0;color:var(--muted)}
+.gate .out{margin-top:6px;font-size:.88rem}
+.tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:20px}
+.tierbox{border:1px solid var(--line);border-top:6px solid;border-radius:10px;padding:14px;background:var(--surface)}
+.tierbox.green{border-top-color:var(--green)} .tierbox.yellow{border-top-color:var(--yellow)} .tierbox.orange{border-top-color:var(--orange)} .tierbox.red{border-top-color:var(--red)}
+.tierbox b{display:block;margin-bottom:4px}
+.tierbox p{margin:0;color:var(--muted);font-size:.9rem}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>UNIL AI use-case check</h1>
+      <p>A decision tree for deciding whether an AI use at the University of Lausanne may go ahead, what risks it carries, which rules apply, and which approval route and safeguards it needs. It complements AI_GO: AI_GO asks which tool your data may go into; this asks what the AI is allowed to decide.</p>
+    </div>
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tab-check" aria-selected="true">Run a check</button>
+      <button role="tab" id="tab-ov" aria-selected="false">How the tree works</button>
+    </div>
+  </header>
+
+  <div id="view-check" class="grid">
+    <main id="main"></main>
+    <aside class="file" aria-label="Case file">
+      <div class="card">
+        <div class="signal">
+          <div class="pole" aria-hidden="true">
+            <div class="lamp" data-t="red"></div>
+            <div class="lamp" data-t="orange"></div>
+            <div class="lamp" data-t="yellow"></div>
+            <div class="lamp" data-t="green"></div>
+          </div>
+          <div class="sig-text" aria-live="polite"><b id="sig-label">No answers yet</b><span id="sig-sub">The signal updates as you answer.</span></div>
+        </div>
+        <ul class="trail" id="trail"></ul>
+      </div>
+    </aside>
+  </div>
+
+  <section id="view-ov" class="ov hidden"></section>
+</div>
+
+<script>
+/* ---------------- Content ---------------- */
+const DIV = {
+  admissions:{l:"Admissions and student affairs", e:"Application pre-screening, document and diploma checks, applicant chatbots, scholarship triage, enrolment management"},
+  teaching:{l:"Teaching, assessment and grading", e:"Automated feedback or grading, AI-writing detection, proctoring, learning analytics, drop-out prediction"},
+  hr:{l:"Recruitment and HR", e:"Job-ad targeting, CV screening, candidate ranking, interview analysis, performance or workload monitoring"},
+  data:{l:"Processing personal data by students and staff", e:"Summarising documents, transcribing interviews, coding qualitative data, research analysis, admin correspondence"},
+  wellbeing:{l:"Student support and wellbeing", e:"Counselling chatbots, mental-health screening, accessibility support"},
+  campus:{l:"Campus services, communication and IT", e:"Library or FAQ chatbots, generated communication content, security cameras, IT operations"}
+};
+
+const STEPS = [
+ {id:"describe", type:"describe", k:"Use case",
+  q:"Which AI use are you checking?",
+  help:"Name it and its owner so the result can go straight into UNIL's AI register. Both fields are optional. Or start from one of the example cases below."},
+ {id:"ai", type:"single", k:"Is it AI?",
+  q:"Does the system produce outputs by inferring them from data, rather than only following fixed rules that someone wrote?",
+  help:"Outputs include text, scores, predictions, classifications or recommendations. This is the core of the AI Act definition (Art. 3(1)): inference plus some autonomy. A spreadsheet formula or a fixed checklist is not AI.",
+  opts:[{v:"yes",l:"Yes, it infers or generates outputs"},{v:"unsure",l:"Not sure",s:"Treated as yes, to be safe."},{v:"no",l:"No, it only applies fixed rules",s:"Out of scope for this tree; ordinary IT and data protection rules still apply."}]},
+ {id:"division", type:"single", k:"Division",
+  q:"In which part of the university will it be used?",
+  help:"Pick the area where its outputs take effect. The division sets the baseline laws and risks.",
+  opts:Object.entries(DIV).map(([v,d])=>({v,l:d.l,s:d.e}))},
+ {id:"art5", type:"multi", k:"Red-line screen",
+  q:"Does the system do any of the following?",
+  help:"These practices are prohibited under Art. 5 of the EU AI Act. Even where the Act does not bind UNIL directly, they conflict with Swiss fundamental rights (Art. 7, 10 and 13 Cst.) and are treated here as institutional red lines. Tick none and continue if nothing applies.",
+  opts:[
+   {v:"emotion",l:"Infers emotions, stress or attention of students or staff",s:"From faces, voice, typing, eye movement, etc.",r:"Art. 5(1)(f) AI Act"},
+   {v:"biocat",l:"Sorts people by biometric data to deduce ethnicity, religion, political views, union membership or sexual orientation",r:"Art. 5(1)(g) AI Act"},
+   {v:"manip",l:"Manipulates people, or exploits age, disability or social or economic situation, in ways likely to cause significant harm",r:"Art. 5(1)(a)–(b) AI Act"},
+   {v:"social",l:"Scores general behaviour or personality and uses it for unrelated or disproportionate unfavourable treatment",r:"Art. 5(1)(c) AI Act"},
+   {v:"scrape",l:"Builds face-recognition databases by scraping images from the internet or CCTV",r:"Art. 5(1)(e) AI Act"}
+  ]},
+ {id:"emoexc", type:"single", k:"Emotion exception",
+  q:"Is emotion inference used strictly for medical or safety reasons?",
+  help:"Art. 5(1)(f) exempts systems placed on the market for medical or safety reasons, such as a clinical tool used by a health professional. Monitoring engagement, exam stress or campus 'mood' does not qualify.",
+  opts:[{v:"yes",l:"Yes, strictly medical or safety",s:"Not prohibited, but emotion recognition is then high-risk (Annex III 1(c))."},{v:"no",l:"No"}]},
+ {id:"impact", type:"single", k:"Decision impact",
+  q:"What does the AI's output do?",
+  help:"This is the central question of the tree: when does an AI tool stop assisting staff and start deciding about people?",
+  opts:[
+   {v:"none",l:"No decision about any person",s:"Drafting, translating, summarising, coding, analysing material. Data about people may still be involved; that is checked later."},
+   {v:"inform",l:"Prepares information for a person who then judges independently",s:"Checks a file for completeness, summarises an application, flags a missing document."},
+   {v:"recommend",l:"Ranks, scores, flags or recommends something about specific people",s:"Staff take the final decision but usually follow the output."},
+   {v:"decide",l:"Produces the outcome directly, or cases are too many to review one by one",s:"Fully or in practice automated."}
+  ]},
+ {id:"annex", type:"multi", k:"High-risk areas",
+  q:"Do the outputs feed into any of these decisions?",
+  help:"These are the high-risk areas of Annex III of the AI Act that matter for a university. Tick all that apply, or none.",
+  opts:[
+   {v:"adm",l:"Admission or access to UNIL programmes",r:"Annex III 3(a)"},
+   {v:"eval",l:"Evaluating learning outcomes, grading or steering a student's learning",r:"Annex III 3(b)"},
+   {v:"level",l:"Deciding which level or track of education a student may access",r:"Annex III 3(c)"},
+   {v:"proct",l:"Detecting prohibited behaviour during tests",s:"Proctoring; AI-writing detectors where their output is used as evidence (arguable).",r:"Annex III 3(d)"},
+   {v:"recruit",l:"Recruiting staff: targeting job ads, filtering CVs, ranking or evaluating candidates",r:"Annex III 4(a)"},
+   {v:"work",l:"Promotion, termination, task allocation, or monitoring and evaluating staff",r:"Annex III 4(b)"},
+   {v:"benefit",l:"Eligibility for financial aid, fee waivers or social support",s:"Arguable for university aid; treated as high-risk to be safe.",r:"Annex III 5(a)"},
+   {v:"bioid",l:"Remote biometric identification of people",s:"Not simple 1:1 verification that a person is who they claim to be.",r:"Annex III 1(a)"}
+  ]},
+ {id:"profiling", type:"single", k:"Profiling",
+  q:"Does it build a profile of individuals by evaluating or predicting their performance, behaviour, reliability or interests?",
+  help:"Under Art. 6(3) AI Act, an Annex III system that profiles people is always high-risk, even if it only prepares a human decision. Profiling also raises the bar under data protection law.",
+  opts:[{v:"yes",l:"Yes"},{v:"no",l:"No"}]},
+ {id:"data", type:"multi", k:"Data",
+  q:"Which kinds of data go into the system?",
+  help:"Mirrors the categories in AI_GO and the sensitive-data list of Vaud's data protection law. Tick none if the material concerns nobody.",
+  opts:[
+   {v:"health",l:"Health, mental health, disability or counselling information",r:"Sensitive"},
+   {v:"bio",l:"Biometric data such as face, voice or fingerprints",r:"Sensitive"},
+   {v:"special",l:"Ethnic origin, religious, political or union views",r:"Sensitive"},
+   {v:"sanction",l:"Disciplinary, administrative or criminal proceedings and sanctions",r:"Sensitive"},
+   {v:"social",l:"Social-aid measures or financial hardship",r:"Sensitive"},
+   {v:"hr",l:"HR files, salaries, appraisals",r:"Confidential"},
+   {v:"records",l:"Academic records, exam papers, grades, application files",r:"Personal, official secrecy"},
+   {v:"research",l:"Confidential or contractually restricted research data",r:"Confidential"},
+   {v:"basic",l:"Names, e-mails and other ordinary personal data",r:"Personal"}
+  ]},
+ {id:"interact", type:"single", k:"Interaction",
+  q:"Does it talk directly to people, or create content published in UNIL's name?",
+  help:"Chatbots, voice agents, generated images, text or video for communication. People must be able to tell they are dealing with AI (Art. 50 AI Act; HLEG requirement of transparency).",
+  opts:[{v:"yes",l:"Yes"},{v:"no",l:"No"}]},
+ {id:"scale", type:"single", k:"Scale and vulnerability",
+  q:"Does it affect many people at once, or people in a vulnerable position?",
+  help:"A whole cohort or applicant pool, or minors, students with disabilities, people in distress or in a dependent position. Errors then repeat at scale or hit those least able to contest them.",
+  opts:[{v:"yes",l:"Yes"},{v:"no",l:"No"}]},
+ {id:"tool", type:"single", k:"Tool and role",
+  q:"Where does the system come from?",
+  help:"This decides whether UNIL acts as a deployer or a provider, and which tool family the data may go into.",
+  opts:[
+   {v:"copilot",l:"Microsoft 365 Copilot Chat with UNIL login",s:"UNIL's institutional LLM under contract."},
+   {v:"local",l:"A local model on your own computer or on UNIL or DCSR infrastructure"},
+   {v:"vendor",l:"Software bought or licensed by UNIL",s:"Including AI features added to software UNIL already uses."},
+   {v:"inhouse",l:"Built or fine-tuned at UNIL for use at UNIL",s:"Including by a research group."},
+   {v:"commercial",l:"A public consumer tool on a personal account",s:"ChatGPT, Gemini, Claude, free online translators or transcribers."}
+  ]},
+ {id:"eu", type:"single", k:"EU reach",
+  q:"Will outputs concern people in the EU or be used in the EU?",
+  help:"Applicants living abroad, Erasmus or joint programmes, EU partner institutions, EU-funded projects. The AI Act reaches non-EU deployers when the output is used in the Union (Art. 2(1)(c)), and the GDPR can apply under Art. 3(2).",
+  opts:[{v:"yes",l:"Yes"},{v:"unsure",l:"Not sure"},{v:"no",l:"No, only in Switzerland"}]}
+];
+
+const PRESETS = [
+ {l:"Pre-screening Master's applications", a:{name:"AI pre-screening of Master's applications",owner:"Admissions office",ai:"yes",division:"admissions",art5:[],impact:"recommend",annex:["adm"],profiling:"yes",data:["records","basic"],interact:"no",scale:"yes",tool:"vendor",eu:"yes"}},
+ {l:"Checking application files for completeness", a:{name:"Completeness check of application files",owner:"Admissions office",ai:"yes",division:"admissions",art5:[],impact:"inform",annex:["adm"],profiling:"no",data:["records","basic"],interact:"no",scale:"yes",tool:"vendor",eu:"no"}},
+ {l:"Predicting students at risk of failing", a:{name:"Early-warning model for students at risk of failure",owner:"Faculty / student services",ai:"yes",division:"teaching",art5:[],impact:"recommend",annex:["eval"],profiling:"yes",data:["records","basic"],interact:"no",scale:"yes",tool:"inhouse",eu:"unsure"}},
+ {l:"AI-assisted essay grading", a:{name:"AI-assisted grading of written assignments",owner:"Course instructor",ai:"yes",division:"teaching",art5:[],impact:"recommend",annex:["eval"],profiling:"no",data:["records"],interact:"no",scale:"yes",tool:"vendor",eu:"unsure"}},
+ {l:"CV screening for PhD positions", a:{name:"CV screening and ranking for doctoral positions",owner:"HR service",ai:"yes",division:"hr",art5:[],impact:"recommend",annex:["recruit"],profiling:"yes",data:["hr","basic"],interact:"no",scale:"yes",tool:"vendor",eu:"yes"}},
+ {l:"Emotion-aware online proctoring", a:{name:"Online exam proctoring with stress and attention detection",owner:"Faculty exam office",ai:"yes",division:"teaching",art5:["emotion"],emoexc:"no"}},
+ {l:"Summarising thesis interviews", a:{name:"Summarising interview transcripts for a Master's thesis",owner:"Student (supervised)",ai:"yes",division:"data",art5:[],impact:"none",data:["basic"],interact:"no",scale:"no",tool:"copilot",eu:"no"}},
+ {l:"Library FAQ chatbot", a:{name:"Library FAQ chatbot",owner:"Library",ai:"yes",division:"campus",art5:[],impact:"none",data:[],interact:"yes",scale:"no",tool:"vendor",eu:"no"}}
+];
+
+/* ---------------- Laws ---------------- */
+const L = {
+ lprd:{n:"Vaud Data Protection Act (LPrD)",r:"BLV 172.65",w:"Governs UNIL as a cantonal body: legal basis, purpose limitation, proportionality, security, rules for outsourcing to processors. A revision adding a duty to inform about automated individual decisions has been in preparation; check its current status."},
+ cst:{n:"Federal Constitution",r:"Art. 5, 8, 9, 13 Cst.",w:"Legality and proportionality of state action, equality and non-discrimination, protection against arbitrariness, privacy and informational self-determination."},
+ secret:{n:"Official secrecy",r:"Art. 320 SCC; staff duty of discretion",w:"Student files, applications, assessments and internal correspondence are not public. Putting them into an uncontracted tool can breach secrecy."},
+ unil:{n:"UNIL AI guidance and AI_GO",r:"AI Strategic Unit, DPO list",w:"Copilot Chat under UNIL login is the only generally authorised LLM; sensitive data such as health or confidential HR data must stay on local models. Faculty rules decide permitted uses in teaching."},
+ lul:{n:"University of Lausanne Act and regulations",r:"LUL, BLV 414.11; RLUL; faculty study regulations",w:"Set the admission, study and examination rules that an AI system may not override or silently change."},
+ lpa:{n:"Vaud Administrative Procedure Act",r:"LPA-VD, BLV 173.36; Art. 29, 29a Cst.",w:"Admission refusals and exam results are administrative decisions: right to be heard, duty to give reasons, right of appeal. An opaque score cannot serve as the reason."},
+ lhand:{n:"Disability Discrimination Act",r:"LHand, RS 151.3",w:"Systems must not disadvantage people with disabilities, for example in timed tests, speech analysis or accessibility of interfaces."},
+ lda:{n:"Copyright Act",r:"LDA, RS 231.1, incl. Art. 24d",w:"Uploading student work or third-party texts can be a reproduction; Art. 24d covers copies for scientific research only."},
+ lpers:{n:"Vaud Staff Act and UNIL staff rules",r:"LPers-VD, BLV 172.31; LUL for teaching staff",w:"Framework for hiring, appraisal and dismissal of UNIL staff, including procedural rights."},
+ leg:{n:"Gender Equality Act",r:"LEg, RS 151.1, Art. 3 and 6",w:"Prohibits direct and indirect discrimination in hiring, promotion and pay; eased burden of proof. Models trained on past hiring can reproduce historic bias."},
+ co328:{n:"Employee data protection",r:"Art. 328b CO (by analogy for public-law staff)",w:"Employee data may only be processed as far as it concerns suitability for the job or performance of the contract."},
+ olt3:{n:"Ban on behaviour monitoring",r:"Art. 26 OLT 3; Art. 3a LTr",w:"Monitoring systems aimed at employee behaviour are prohibited. These health-protection rules also apply to public administrations."},
+ lrh:{n:"Human Research Act",r:"LRH, RS 810.30, Art. 3",w:"Research with health-related personal data needs ethics approval (CER-VD) and its own data rules."},
+ s321:{n:"Professional secrecy",r:"Art. 321 SCC",w:"Doctors and psychologists in counselling services are bound by professional secrecy; AI processing must not breach it."},
+ linfo:{n:"Vaud Information Act",r:"LInfo, BLV 170.21",w:"Public information duties of authorities; supports a public register of AI systems used for decisions."},
+ video:{n:"Cantonal video-surveillance rules",r:"Currently in the LPrD; separate law proposed",w:"Cameras on campus need a legal basis and proportionality; adding AI analysis changes the purpose and needs a fresh assessment."},
+ /* EU */
+ ai2:{n:"AI Act territorial scope",r:"Art. 2(1)(c) AI Act",w:"Applies to deployers outside the EU when the output is used in the Union."},
+ ai4:{n:"AI literacy",r:"Art. 4 AI Act",w:"Staff operating AI need sufficient AI literacy. Applies since 2 February 2025."},
+ ai5:{n:"Prohibited practices",r:"Art. 5 AI Act",w:"Applies since 2 February 2025."},
+ ai6:{n:"High-risk classification",r:"Art. 6(2)–(4), Annex III AI Act",w:"Education, employment and access to benefits are listed areas. Under the revised timeline in the course slides, obligations for Annex III systems apply from 2 December 2027."},
+ ai63:{n:"Exemption for preparatory tasks",r:"Art. 6(3)–(4) AI Act",w:"A listed system may escape high-risk status if it performs a narrow or preparatory task and does not replace human assessment; never if it profiles people. The assessment must be documented."},
+ ai26:{n:"Deployer obligations",r:"Art. 26 AI Act",w:"Use per instructions, competent human oversight, relevant input data, monitoring, logs kept at least 6 months, informing workers' representatives and affected persons."},
+ ai27:{n:"Fundamental rights impact assessment",r:"Art. 27 AI Act",w:"Required for deployers that are bodies governed by public law before using a high-risk system."},
+ ai50:{n:"Transparency for interactive and generative AI",r:"Art. 50 AI Act",w:"People must be told they are interacting with AI; generated or manipulated content must be marked."},
+ ai86:{n:"Right to explanation",r:"Art. 86 AI Act",w:"Affected persons can obtain a clear explanation of the AI's role in a decision about them."},
+ ai16:{n:"Provider obligations",r:"Art. 16–25 AI Act",w:"If UNIL builds a system and places it on the EU market or its output is used in the EU, UNIL is a provider: risk management, data governance, documentation, conformity assessment."},
+ gdpr:{n:"GDPR",r:"Art. 3(2), 22, 35 GDPR",w:"Can apply to processing about people in the EU; restricts solely automated decisions with legal or similarly significant effects; requires a DPIA for high-risk processing."},
+ /* soft */
+ coe:{n:"Council of Europe AI Convention",r:"CETS 225, Art. 14–16",w:"Signed by Switzerland, not yet ratified. Sets expectations on remedies, procedural safeguards and risk management for public bodies."},
+ hleg:{n:"HLEG Ethics Guidelines for Trustworthy AI",r:"2019, Chapter III assessment list",w:"Seven requirements: human agency and oversight, robustness, privacy, transparency, fairness, societal well-being, accountability."}
+};
+
+const DIVLAWS = {
+ admissions:{sw:["lul","lpa","lhand"],eu:["gdpr"]},
+ teaching:{sw:["lul","lpa","lhand","lda"],eu:[]},
+ hr:{sw:["lpers","leg","co328","olt3","lhand"],eu:[]},
+ data:{sw:["lda","lrh"],eu:[]},
+ wellbeing:{sw:["s321","lrh","lhand"],eu:[]},
+ campus:{sw:["linfo","video","lda"],eu:[]}
+};
+
+const DIVRISKS = {
+ admissions:[["Unequal treatment of applicants","Models trained on past cohorts can disadvantage foreign diplomas, non-native speakers or under-represented schools."],["Unreasoned refusals","An admission refusal must be reasoned and appealable; a score the office cannot explain fails that test."]],
+ teaching:[["Grades that cannot be justified","Students can contest grades; examiners must be able to explain them without relying on the model."],["False accusations of misconduct","AI-writing detectors produce false positives, with a higher rate for non-native writers."],["Loss of academic judgement","Over-reliance on suggested grades shifts assessment from teacher to tool."]],
+ hr:[["Discrimination in hiring","CV screening learned from past hires can reproduce gender, age or origin bias, often indirectly."],["Surveillance of staff","Monitoring tools can slide into prohibited behaviour monitoring and harm trust."],["Unclear accountability","When a vendor's model ranks candidates, UNIL remains responsible for the outcome."]],
+ data:[["Data leaving UNIL's control","Pasting personal or confidential material into an uncontracted tool hands it to a third party, often abroad."],["Re-identification","Interview data that looks anonymised can still identify people through context."],["Breach of research commitments","Consent forms, ethics protocols or contracts may forbid processing by external services."]],
+ wellbeing:[["Harm to people in distress","Wrong or unsafe responses reach the most vulnerable users first."],["Exposure of health data","Counselling content is sensitive and covered by professional secrecy."],["Stigmatisation","Flagging students as 'at risk' can follow them into other decisions."]],
+ campus:[["People not realising they deal with AI","Chatbots and generated content must be identifiable as AI."],["Function creep","Data collected for operations, such as cameras or logs, gets reused for monitoring people."],["Wrong institutional information","A chatbot that invents rules or deadlines speaks in UNIL's name."]]
+};
+
+/* ---------------- Logic ---------------- */
+const S = {a:{}, cur:"describe", view:"check"};
+
+function sensitiveOf(a){return (a.data||[]).filter(x=>["health","bio","special","sanction","social"].includes(x));}
+function isProhibited(a){
+  const f=a.art5||[];
+  if(f.some(x=>x!=="emotion")) return true;
+  if(f.includes("emotion")) return a.emoexc!=="yes";
+  return false;
+}
+function art5Done(a){
+  if(!("art5" in a)) return false;
+  if((a.art5||[]).includes("emotion") && !("emoexc" in a)) return false;
+  return true;
+}
+function visible(step,a){
+  const id=step.id;
+  if(id==="describe"||id==="ai") return true;
+  if(a.ai==="no") return false;
+  if(id==="division"||id==="art5") return true;
+  if(id==="emoexc") return (a.art5||[]).includes("emotion");
+  if(art5Done(a) && isProhibited(a)) return false;
+  if(id==="annex"||id==="profiling") return a.impact && a.impact!=="none";
+  return true;
+}
+function activeSteps(){return STEPS.filter(s=>visible(s,S.a));}
+function cleanAnswers(){const out={name:S.a.name,owner:S.a.owner};activeSteps().forEach(s=>{if(s.id in S.a)out[s.id]=S.a[s.id];});return out;}
+
+function evaluate(a){
+  const R={tier:"green",reasons:[],risks:[],sw:new Set(["lprd","cst","secret","unil"]),eu:new Set(),soft:new Set(["hleg"]),blockers:[],safe:[],cls:""};
+  if(a.ai==="no"){R.tier="grey";return R;}
+  const div=a.division;
+  const sens=sensitiveOf(a);
+  const data=a.data||[];
+  const personal=data.length>0;
+  const annex=(a.annex||[]).length>0;
+  const people=a.impact && a.impact!=="none";
+  const euYes=a.eu==="yes", euMaybe=a.eu==="unsure";
+
+  if(div){(DIVLAWS[div].sw).forEach(x=>R.sw.add(x));DIVRISKS[div].forEach(r=>R.risks.push(r));}
+
+  // Tier 4: prohibited
+  if(art5Done(a) && isProhibited(a)){
+    R.tier="red";
+    R.cls="Prohibited practice (Art. 5 AI Act) and an institutional red line.";
+    R.eu.add("ai5"); R.eu.add("ai2");
+    R.reasons.push("The system performs a practice banned under Art. 5 of the AI Act.");
+    if((a.art5||[]).includes("emotion")) R.risks.unshift(["Scientifically weak and intrusive","Emotion inference is unreliable across cultures and individuals and has a chilling effect on students and staff."]);
+    R.risks.unshift(["Violation of human dignity and privacy","The practice targets people's inner states or protected traits, which Swiss fundamental rights and EU law treat as off-limits."]);
+    return R;
+  }
+
+  let score=0;
+  const emoMed=(a.art5||[]).includes("emotion") && a.emoexc==="yes";
+  const highRisk = emoMed || (annex && (a.impact==="recommend"||a.impact==="decide"||a.profiling==="yes"));
+  const art63 = annex && a.impact==="inform" && a.profiling!=="yes";
+
+  if(highRisk){score=3;R.reasons.push(emoMed?"Emotion recognition for medical or safety purposes is high-risk (Annex III 1(c)).":"The outputs shape a decision in an Annex III area"+(a.profiling==="yes"?" and the system profiles people, so the Art. 6(3) exemption is excluded.":", so it is a high-risk use."));}
+  if(a.impact==="decide"){score=Math.max(score,3);R.reasons.push("Outcomes are produced without meaningful case-by-case human review.");}
+  if(sens.length && (a.impact==="recommend"||a.impact==="decide")){score=Math.max(score,3);R.reasons.push("Sensitive data feeds into recommendations or decisions about people.");}
+  if(art63){score=Math.max(score,2);R.reasons.push("Listed area, but only a preparatory task: a possible Art. 6(3) exemption that must be assessed and documented.");}
+  if(a.impact==="recommend" && !annex){score=Math.max(score,2);R.reasons.push("It scores or ranks people, even outside a listed high-risk area.");}
+  if(a.profiling==="yes" && !annex){score=Math.max(score,2);R.reasons.push("It profiles individuals.");}
+  if(sens.length){score=Math.max(score,2);R.reasons.push("It processes sensitive personal data.");}
+  if(data.includes("hr")||data.includes("research")){score=Math.max(score,2);R.reasons.push("It processes confidential HR or research data.");}
+  if(a.tool==="inhouse"){score=Math.max(score,2);R.reasons.push("UNIL builds the system itself and may become its provider.");}
+  if(personal && (a.tool==="vendor"||a.tool==="commercial")){score=Math.max(score,2);R.reasons.push("Personal data goes to a third-party system.");}
+  if(a.scale==="yes" && people){score=Math.max(score,2);R.reasons.push("It affects many people or vulnerable people.");}
+  if(euYes && people){score=Math.max(score,2);R.reasons.push("Outputs about people are used in the EU.");}
+  if(score===0) R.reasons.push("No decision about people, no sensitive data and an approved tool route.");
+
+  R.tier=["green","green","yellow","orange"][score];
+  R.cls = highRisk ? "High-risk use (Art. 6(2) and Annex III AI Act); treat as high-risk in UNIL's governance whether or not the Act applies directly."
+        : art63 ? "Listed area with a possible Art. 6(3) exemption; document the assessment (Art. 6(4))."
+        : score>=2 ? "Not high-risk under the AI Act, but needs review for data protection and fairness."
+        : "Low-risk use under existing UNIL rules.";
+
+  // data-route blockers (AI_GO logic)
+  if(a.tool==="commercial" && personal) R.blockers.push(["Not allowed with this tool","Commercial LLMs on personal accounts may not receive personal or confidential data under AI_GO. Move to Copilot with UNIL login or a local model."]);
+  if(a.tool==="commercial" && (data.includes("records")||data.includes("hr"))) R.blockers.push(["Official secrecy risk","Student files and HR data are covered by official secrecy (Art. 320 SCC)."]);
+  if(a.tool==="copilot" && sens.length) R.blockers.push(["Copilot is not cleared for this data","UNIL guidance excludes health data, identifying health information and confidential HR data from Copilot. Use a local model and contact the DCSR."]);
+  if(a.tool==="copilot" && data.includes("hr") && !sens.length) R.blockers.push(["Local model unless a DPIA clears it","AI_GO routes income and salary data to local models only, unless an impact assessment with the DPO concludes the risk is low."]);
+  if(a.tool==="copilot" && people) R.blockers.push(["General chatbot used for decisions","Copilot is authorised as a productivity tool. Using it to score or decide about people turns it into a decision system without validation, logs or bias testing."]);
+
+  // risks by trigger
+  if(a.impact==="decide") R.risks.push(["No meaningful human review","Automated outcomes cannot be reasoned or contested and may breach procedural guarantees."]);
+  if(a.impact==="recommend") R.risks.push(["Automation bias","Staff tend to follow rankings and flags; oversight becomes a formality."]);
+  if(a.profiling==="yes") R.risks.push(["Self-fulfilling predictions","Labelling people as 'weak' or 'at risk' changes how they are treated and can make the prediction come true."]);
+  if(sens.length) R.risks.push(["Exposure of sensitive data","A breach or misuse of sensitive data causes serious and lasting harm."]);
+  if(a.tool==="vendor") R.risks.push(["Opaque vendor model","Vendors may change models silently, withhold performance data or reuse UNIL data for training."]);
+  if(a.tool==="inhouse") R.risks.push(["Provider responsibility","UNIL carries design responsibility: data quality, testing, documentation and maintenance."]);
+  if(a.scale==="yes") R.risks.push(["Errors at scale","One flaw affects a whole cohort, and vulnerable people are least able to contest it."]);
+  if(a.interact==="yes") R.risks.push(["Hidden AI","People may not realise they are dealing with a machine or receive invented information."]);
+
+  // laws
+  if(people && (a.division==="admissions"||a.division==="teaching")) R.sw.add("lpa");
+  if(sens.includes("health")) {R.sw.add("lrh");}
+  if((a.annex||[]).some(x=>["recruit","work"].includes(x))) {R.sw.add("leg");R.sw.add("olt3");}
+  if(a.interact==="yes") R.eu.add("ai50");
+  if(euYes||euMaybe){R.eu.add("ai2");R.eu.add("ai4");if(highRisk||art63)R.eu.add("ai6");if(art63)R.eu.add("ai63");if(highRisk){R.eu.add("ai26");R.eu.add("ai27");R.eu.add("ai86");}if(people||personal)R.eu.add("gdpr");if(a.tool==="inhouse")R.eu.add("ai16");}
+  else if(highRisk||art63){R.eu.add("ai6");if(art63)R.eu.add("ai63");}
+  if(people) R.soft.add("coe");
+  return R;
+}
+
+const ROUTES = {
+ green:{h:"Self-service under existing rules",steps:[
+  ["Check the data route in AI_GO","Confirm which tool family the data may go into."],
+  ["Use an approved tool","Copilot Chat with UNIL login, ideally the UNIL [Secure] agent, or a local model."],
+  ["Follow faculty or service rules","Teaching and research uses are governed by the rules of the faculty, the teacher and the publisher."],
+  ["Keep AI literacy up to date","Complete UNIL's AI training resources; no approval needed."]]},
+ yellow:{h:"Conditional review by the AI Strategic Unit and the DPO",steps:[
+  ["Register the use case","The owner files an entry in UNIL's AI register (template below)."],
+  ["Data protection check by the DPO","Including an impact assessment where sensitive data or profiling are involved."],
+  ["Tool and vendor check by the AI Strategic Unit","Contract terms, hosting, training-use clauses and, where relevant, the documented Art. 6(3) assessment."],
+  ["Conditional approval","Signed by the dean or head of service, with a named owner and the conditions listed below."],
+  ["Review within 12 months","Or earlier after any change in purpose, data or model."]]},
+ orange:{h:"Full institutional review before deployment",steps:[
+  ["Register and notify","Owner files the register entry and informs the AI Strategic Unit before any procurement or development."],
+  ["Impact assessments","DPO-led data protection impact assessment plus a fundamental-rights impact assessment modelled on Art. 27 AI Act, with the Equal Opportunities Office."],
+  ["Vendor or design due diligence","Instructions for use, accuracy and error rates by group, logging, human-oversight features, conformity evidence, hosting and no training on UNIL data."],
+  ["Consult affected groups","Student federation (FAE), staff representatives or applicant perspectives, and workers' representatives before workplace use."],
+  ["Legal check of the decision procedure","Legal Service confirms reasons, right to be heard and appeal routes work with the AI in the loop."],
+  ["Shadow pilot","Run the system alongside human decisions without effect; compare outcomes and measure disparities."],
+  ["Decision by the Direction","Approval, conditions or refusal; published in a public AI register."],
+  ["Monitoring and re-approval","Ongoing monitoring, incident reporting, yearly review and re-approval after substantial changes."]]},
+ red:{h:"Not permitted",steps:[
+  ["Stop","Do not procure, develop or pilot the system in this form."],
+  ["Document the refusal","Record the use case and reason in the AI register so the request does not reappear elsewhere."],
+  ["Redesign the goal","Pursue the underlying aim without the prohibited function, for example anonymous surveys instead of emotion tracking."],
+  ["Exception only for medical or safety purposes","Such a case goes through the full institutional review as a high-risk system."]]}
+};
+
+function safeguards(a,R){
+  const s=[];
+  const people=a.impact && a.impact!=="none";
+  if(R.tier==="red") return [["Redesign without the prohibited function","Remove emotion inference, biometric categorisation, scoring or manipulation entirely."],["Non-intrusive alternatives","Anonymous surveys, opt-in services and human contact points."]];
+  s.push(["Approved tool and data route","Only the tool family AI_GO allows for the data involved."]);
+  if(people){
+    s.push(["Named human decision-maker","A competent person reviews each case, has time to do so, and can override or ignore the output (Art. 14 and 26 AI Act model)."]);
+    s.push(["Inform affected people","Tell applicants, students or staff that AI is used, for what and how to contest it."]);
+    s.push(["Reasoned decisions and appeal","Reasons must stand on their own without the model; existing appeal routes stay open."]);
+  }
+  if(a.impact==="recommend"||a.impact==="decide"||a.profiling==="yes"){
+    s.push(["Bias testing before and during use","Measure error and selection rates by gender, nationality or language, age and disability; set thresholds that trigger a stop."]);
+    s.push(["Automation-bias training","Reviewers learn the system's limits and are expected to disagree with it."]);
+  }
+  if(a.impact==="decide") s.push(["Human route on request","Anyone can ask for a fully human review of their case."]);
+  if(R.tier==="orange"){
+    s.push(["Logs kept at least six months","So individual decisions can be traced and audited (Art. 26(6) AI Act model)."]);
+    s.push(["Stop mechanism and fallback","A documented way to suspend the system and continue manually."]);
+    s.push(["Incident reporting","Serious errors are reported to the AI Strategic Unit and, where applicable, the vendor and authorities."]);
+  }
+  if((a.data||[]).length){
+    s.push(["Data minimisation","Only the data needed for the purpose; no free-text fields that invite sensitive details."]);
+  }
+  if(a.tool==="vendor"){
+    s.push(["Processor contract","Hosting in Switzerland or the EU/EFTA, no training on UNIL data, audit rights, notice of model changes, deletion at end of contract."]);
+  }
+  if(a.tool==="inhouse") s.push(["Technical documentation","Purpose, training data, evaluation results and known limits recorded as a provider would (Annex IV AI Act model)."]);
+  if(a.interact==="yes") s.push(["AI disclosure","Users see at the start that they are interacting with AI; generated content is labelled."]);
+  if(a.scale==="yes") s.push(["Accessibility and vulnerable users","Accessible interface and a non-AI alternative for those who need it."]);
+  if(sensitiveOf(a).length) s.push(["Local processing only","Sensitive data stays on local models or UNIL infrastructure, with access logging."]);
+  s.push(["Register entry and owner","A named owner keeps the register entry current."]);
+  return s;
+}
+
+const TIERTXT = {
+ green:{t:"Green",h:"Permitted with standard rules",p:"The use does not decide about people and the data can go into the chosen tool. It can go ahead under UNIL's existing guidance."},
+ yellow:{t:"Yellow",h:"Conditional: review needed",p:"Usable after a documented review by the AI Strategic Unit and the Data Protection Officer, with the conditions below."},
+ orange:{t:"Orange",h:"High-risk: full institutional review",p:"The AI shapes consequential decisions about people or relies on sensitive data. It needs impact assessments, consultation, a pilot and a decision by the Direction before use."},
+ red:{t:"Red",h:"Prohibited",p:"The use falls into a practice banned by the EU AI Act and incompatible with fundamental rights. It cannot be approved in this form."},
+ grey:{t:"Out of scope",h:"Not an AI system",p:"Fixed-rule software falls outside this tree. Data protection, secrecy and procedural rules still apply in the usual way."}
+};
+
+/* ---------------- Rendering ---------------- */
+const $=s=>document.querySelector(s);
+const esc=t=>String(t??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function shortAnswer(step,v){
+  if(step.type==="describe") return S.a.name||"Unnamed use case";
+  if(step.type==="multi"){const arr=v||[];if(!arr.length)return "None";return arr.map(x=>(step.opts.find(o=>o.v===x)||{}).l).join("; ");}
+  const o=step.opts.find(o=>o.v===v);return o?o.l:"";
+}
+
+function renderTrail(){
+  const list=activeSteps();const ul=$("#trail");
+  const answered=list.filter(s=>s.id==="describe"?S.cur!=="describe":(s.id in S.a));
+  if(!answered.length){ul.innerHTML='<li class="empty">Your answers collect here. Select any of them to change it.</li>';}
+  else ul.innerHTML=answered.map(s=>`<li class="${s.id===S.cur?"cur":""}"><button data-go="${s.id}"><span class="k">${esc(s.k)}</span><span class="v">${esc(shortAnswer(s,S.a[s.id]))}</span></button></li>`).join("");
+  ul.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{S.cur=b.dataset.go;render();});
+  // signal
+  const a=cleanAnswers();
+  const hasAny=STEPS.some(s=>s.id!=="describe" && s.id in a);
+  document.querySelectorAll(".lamp").forEach(l=>l.className="lamp");
+  if(!hasAny){$("#sig-label").textContent="No answers yet";$("#sig-sub").textContent="The signal updates as you answer.";return;}
+  const R=evaluate(a);
+  if(R.tier!=="grey") document.querySelector(`.lamp[data-t="${R.tier}"]`).classList.add("on",R.tier);
+  $("#sig-label").textContent=TIERTXT[R.tier].h;
+  $("#sig-sub").textContent=S.cur==="result"?"Final result":"Provisional, based on answers so far";
+}
+
+function next(){
+  const list=activeSteps();const i=list.findIndex(s=>s.id===S.cur);
+  S.cur = (i<0||i===list.length-1)?"result":list[i+1].id;
+  render();
+}
+function back(){
+  const list=activeSteps();
+  if(S.cur==="result"){S.cur=list[list.length-1].id;render();return;}
+  const i=list.findIndex(s=>s.id===S.cur);if(i>0){S.cur=list[i-1].id;render();}
+}
+
+function renderStep(step){
+  const list=activeSteps();const pos=list.findIndex(s=>s.id===step.id)+1;
+  let h=`<div class="card"><div class="step-meta">Question ${pos} of about ${list.length} · ${esc(step.k)}</div><h2 class="q">${esc(step.q)}</h2><p class="help">${esc(step.help)}</p>`;
+  if(step.type==="describe"){
+    h+=`<label class="field">Use case<span>For example "AI pre-screening of Master's applications"</span><input type="text" id="f-name" value="${esc(S.a.name||"")}"></label>
+        <label class="field">Owner<span>Unit or person responsible</span><input type="text" id="f-owner" value="${esc(S.a.owner||"")}"></label>
+        <div class="actions"><button class="btn primary" id="go">Start the check</button></div>
+        <div class="presets"><h3>Example cases</h3><p class="hint">Fill in the whole tree for a typical UNIL scenario and show the result.</p><div class="chips">${PRESETS.map((p,i)=>`<button class="chip" data-p="${i}">${esc(p.l)}</button>`).join("")}</div></div>`;
+    h+="</div>";$("#main").innerHTML=h;
+    $("#go").onclick=()=>{S.a.name=$("#f-name").value.trim();S.a.owner=$("#f-owner").value.trim();next();};
+    document.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{S.a=JSON.parse(JSON.stringify(PRESETS[+b.dataset.p].a));S.cur="result";render();});
+    $("#f-name").focus();return;
+  }
+  if(step.type==="single"){
+    h+=`<div class="opts">${step.opts.map(o=>`<button class="opt ${S.a[step.id]===o.v?"on":""}" aria-pressed="${S.a[step.id]===o.v}" data-v="${o.v}"><span><span class="lbl">${esc(o.l)}</span>${o.s?`<span class="sub">${esc(o.s)}</span>`:""}${o.r?`<span class="ref">${esc(o.r)}</span>`:""}</span></button>`).join("")}</div>`;
+    h+=`<div class="actions"><button class="btn" id="back" ${pos<=1?"disabled":""}>Back</button><span class="hint">Choosing an answer moves on.</span></div></div>`;
+    $("#main").innerHTML=h;
+    document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{S.a[step.id]=b.dataset.v;next();});
+  } else {
+    const cur=new Set(S.a[step.id]||[]);
+    h+=`<div class="opts">${step.opts.map(o=>`<button class="opt ${cur.has(o.v)?"on":""}" aria-pressed="${cur.has(o.v)}" data-v="${o.v}"><span class="box" aria-hidden="true"></span><span><span class="lbl">${esc(o.l)}</span>${o.s?`<span class="sub">${esc(o.s)}</span>`:""}${o.r?`<span class="ref">${esc(o.r)}</span>`:""}</span></button>`).join("")}</div>`;
+    h+=`<div class="actions"><button class="btn" id="back">Back</button><button class="btn primary" id="cont">Continue</button><span class="hint">Nothing ticked means none apply.</span></div></div>`;
+    $("#main").innerHTML=h;
+    document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{const v=b.dataset.v;cur.has(v)?cur.delete(v):cur.add(v);b.classList.toggle("on");b.setAttribute("aria-pressed",cur.has(v));});
+    $("#cont").onclick=()=>{S.a[step.id]=[...cur];if(step.id==="art5"&&!cur.has("emotion"))delete S.a.emoexc;next();};
+  }
+  const bk=$("#back");if(bk)bk.onclick=back;
+  const first=document.querySelector(".opt");if(first)first.focus({preventScroll:true});
+}
+
+function lawItems(keys){return [...keys].map(k=>L[k]).filter(Boolean).map(x=>`<li><b>${esc(x.n)}</b><span class="ref">${esc(x.r)}</span><p>${esc(x.w)}</p></li>`).join("");}
+
+function registerText(a,R){
+  const st=k=>{const s=STEPS.find(x=>x.id===k);return s&&(k in a)?shortAnswer(s,a[k]):"n/a";};
+  return [
+   "UNIL AI REGISTER ENTRY",
+   "Use case: "+(a.name||"(not named)"),
+   "Owner: "+(a.owner||"(not named)"),
+   "Division: "+(a.division?DIV[a.division].l:"n/a"),
+   "Decision impact: "+st("impact"),
+   "High-risk areas: "+st("annex"),
+   "Profiling: "+st("profiling"),
+   "Data: "+st("data"),
+   "Tool / supplier: "+st("tool"),
+   "EU reach: "+st("eu"),
+   "Classification: "+R.cls,
+   "Risk tier: "+TIERTXT[R.tier].t+" – "+TIERTXT[R.tier].h,
+   "Approval route: "+(ROUTES[R.tier]?ROUTES[R.tier].h:"n/a"),
+   "Required safeguards: "+safeguards(a,R).map(x=>x[0]).join("; "),
+   "Status: proposed – to be verified by the AI Strategic Unit and DPO",
+   "Date: "+new Date().toISOString().slice(0,10)
+  ].join("\n");
+}
+
+function renderResult(){
+  const a=cleanAnswers();const R=evaluate(a);const T=TIERTXT[R.tier];
+  let h=`<div class="verdict ${R.tier}"><div class="tier">${esc(T.t)}${a.name?" · "+esc(a.name):""}</div><h2>${esc(T.h)}</h2><p>${esc(T.p)}</p></div>`;
+  if(R.tier==="grey"){h+=`<div class="actions"><button class="btn" id="back">Back</button><button class="btn primary" id="restart">Check another use case</button></div>`;$("#main").innerHTML=`<div class="card">${h}</div>`;$("#back").onclick=back;$("#restart").onclick=restart;return;}
+  h+=`<div class="section"><h3>Why this result</h3><ul class="items">${R.reasons.map(r=>`<li>${esc(r)}</li>`).join("")}</ul><p class="hint" style="margin-top:10px"><b>Classification:</b> ${esc(R.cls)}</p></div>`;
+  if(R.blockers.length) h+=`<div class="section"><h3>Fix before anything else</h3>${R.blockers.map(b=>`<div class="blocker"><b>${esc(b[0])}</b>${esc(b[1])}</div>`).join("")}</div>`;
+  h+=`<div class="section"><h3>Risks to address</h3><ul class="items">${R.risks.map(r=>`<li><b>${esc(r[0])}</b><p>${esc(r[1])}</p></li>`).join("")}</ul></div>`;
+  h+=`<div class="section"><h3>Laws and frameworks to consider</h3>
+      <div class="lawgroup"><h4>Swiss and Vaud law, UNIL rules</h4><ul class="items">${lawItems(R.sw)}</ul></div>
+      ${R.eu.size?`<div class="lawgroup"><h4>EU law${a.eu==="no"?" (as benchmark)":a.eu==="unsure"?" (check whether it applies)":""}</h4><ul class="items">${lawItems(R.eu)}</ul></div>`:""}
+      <div class="lawgroup"><h4>Soft law and ethics</h4><ul class="items">${lawItems(R.soft)}</ul></div></div>`;
+  const route=ROUTES[R.tier];
+  h+=`<div class="section"><h3>Approval route: ${esc(route.h.toLowerCase())}</h3><ol class="route">${route.steps.map(s=>`<li><b>${esc(s[0])}</b><span>${esc(s[1])}</span></li>`).join("")}</ol></div>`;
+  h+=`<div class="section"><h3>Safeguards checklist</h3><ul class="items check">${safeguards(a,R).map((s,i)=>`<li><input type="checkbox" id="sg${i}" aria-label="${esc(s[0])} done"><label for="sg${i}"><b>${esc(s[0])}</b><p>${esc(s[1])}</p></label></li>`).join("")}</ul></div>`;
+  h+=`<div class="section"><h3>AI register entry</h3><p class="hint">Copy into UNIL's AI register. Fields follow the register structure: department, purpose, affected people, data, supplier, classification, risk tier, owner, safeguards.</p><textarea id="reg" readonly>${esc(registerText(a,R))}</textarea><div class="actions"><button class="btn" id="copy">Copy entry</button><span class="hint" id="copied" aria-live="polite"></span></div></div>`;
+  h+=`<div class="actions"><button class="btn" id="back">Back</button><button class="btn primary" id="restart">Check another use case</button></div>`;
+  h+=`<p class="note">A governance aid for a course project, not legal advice. Legal references reflect the state known in October 2026 and should be verified, in particular the status of the Vaud LPrD revision and the AI Act timeline. The roles of UNIL bodies in the approval routes are a proposal to be confirmed with the AI Strategic Unit and the DPO.</p>`;
+  $("#main").innerHTML=`<div class="card">${h}</div>`;
+  $("#back").onclick=back;$("#restart").onclick=restart;
+  $("#copy").onclick=async()=>{const t=$("#reg");try{await navigator.clipboard.writeText(t.value);$("#copied").textContent="Copied";}catch(e){t.select();$("#copied").textContent="Text selected; press Ctrl+C or Cmd+C";}};
+  window.scrollTo({top:0});
+}
+
+function restart(){S.a={};S.cur="describe";render();}
+
+function render(){
+  if(S.cur==="result") renderResult();
+  else{const st=STEPS.find(s=>s.id===S.cur);if(!st||!visible(st,S.a)){S.cur="result";renderResult();}else renderStep(st);}
+  renderTrail();
+}
+
+/* ---------------- Overview ---------------- */
+function renderOverview(){
+  const gates=[
+   ["Is it AI?","Applies the AI Act definition: inference and some autonomy.","No: out of scope, ordinary rules apply."],
+   ["Which division?","Admissions, teaching and grading, HR, personal data processing, wellbeing, campus services.","Sets the baseline laws and risks."],
+   ["Red-line screen","Emotion inference, biometric categorisation, manipulation, social scoring, face scraping (Art. 5 AI Act).","Any yes: Red, unless emotion inference is strictly medical or safety."],
+   ["Decision impact","No decision, preparation, recommendation or automated decision about people.","The pivot between assisting staff and deciding about people."],
+   ["High-risk areas and profiling","Annex III areas relevant to universities, plus the Art. 6(3) profiling rule.","Listed area and recommendation, decision or profiling: Orange. Preparatory only: Yellow with documented Art. 6(3) assessment."],
+   ["Data","Sensitive, confidential and ordinary personal data, aligned with AI_GO.","Sensitive data raises the tier and restricts tools to local models."],
+   ["Interaction, scale and vulnerability","Chatbots and generated content; cohort-wide or vulnerable groups.","Adds transparency duties and raises the tier where people are affected."],
+   ["Tool and EU reach","Copilot, local, vendor, in-house or consumer tool; EU applicants and partners.","Decides deployer or provider role, data-route blockers and whether EU law applies directly."]
+  ];
+  $("#view-ov").innerHTML=`<h2>How the tree works</h2>
+   <p class="lead">Eight gates, asked in this order. Each answer can skip later questions, as in AI_GO. The result combines the gates into one of four tiers, then attaches the risks, the applicable law, an approval route and a safeguards checklist.</p>
+   <div class="gates">${gates.map(g=>`<div class="gate"><div class="n"></div><div><h3>${esc(g[0])}</h3><p>${esc(g[1])}</p><div class="out"><b>Effect:</b> ${esc(g[2])}</div></div></div>`).join("")}</div>
+   <div class="tiers">${["green","yellow","orange","red"].map(t=>`<div class="tierbox ${t}"><b>${TIERTXT[t].t}: ${TIERTXT[t].h}</b><p>${esc(ROUTES[t].h)}.</p></div>`).join("")}</div>
+   <p class="note">Sources: EU AI Act (Regulation 2024/1689), Art. 2–6, 26–27, 50, 86 and Annex III; HLEG Ethics Guidelines for Trustworthy AI (2019); IAPP EU AI Act Compliance Matrix (2024); Council of Europe Framework Convention (CETS 225); Vaud LPrD, LUL, LPA-VD, LPers-VD, LInfo; federal Constitution, LEg, LHand, LRH, LDA, OLT 3, SCC; UNIL AI portal guidance on Copilot and AI_GO (2026).</p>`;
+}
+
+/* ---------------- Tabs ---------------- */
+function setView(v){
+  S.view=v;
+  $("#tab-check").setAttribute("aria-selected",v==="check");$("#tab-ov").setAttribute("aria-selected",v==="ov");
+  $("#view-check").classList.toggle("hidden",v!=="check");$("#view-ov").classList.toggle("hidden",v!=="ov");
+}
+$("#tab-check").onclick=()=>setView("check");
+$("#tab-ov").onclick=()=>setView("ov");
+renderOverview();render();
+</script>
+</body>
+</html>
